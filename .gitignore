@@ -1,0 +1,10 @@
+# Ignore all build directories and their contents
+build/
+build/*
+
+# Ignore all devel directories and their contents
+devel/
+devel/*
+
+# Ignore the catkin workspace file
+.catkin_workspace
