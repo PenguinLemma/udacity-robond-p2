@@ -27,8 +27,12 @@
 
     <xacro:property name="z_offset_between_centers" value="${wheel_radius - base_height/2}" />
 
+    <!-- Camera parameters -->
+    <xacro:property name="camera_edge_length" value="0.05" />
+    <xacro:property name="camera_mass" value="0.1" />
+
     <!-- Sensor's base parameters -->
-    <xacro:property name="sensors_base_heigth" value="${(2*wheel_radius - base_height)/2}" />
+    <xacro:property name="sensors_base_heigth" value="${1.5*camera_edge_length}" />
     <xacro:property name="sensors_base_mass" value="5.0" />
     <xacro:property name="sensors_base_offset_z" value="${base_height/2 + sensors_base_heigth/2}" />
     <!-- </PARAMETERS> -->
@@ -43,6 +47,18 @@
                 ixx="${1/12*mass*(3*radius*radius + length*length)}" ixy="0" ixz="0"
                 iyy="${1/12*mass*(3*radius*radius + length*length)}" iyz="0"
                 izz="${1/2*mass*radius*radius}"
+            />
+        </inertial>
+    </xacro:macro>
+
+    <!-- Inertial of a cube -->
+    <xacro:macro name="cube_inertial" params="mass edge_length">
+        <inertial>
+            <mass value="${mass}" />
+            <inertia
+                ixx="${1/6*mass*edge_length*edge_length}" ixy="0" ixz="0"
+                iyy="${1/6*mass*edge_length*edge_length}" iyz="0"
+                izz="${1/6*mass*edge_length*edge_length}"
             />
         </inertial>
     </xacro:macro>
@@ -193,6 +209,33 @@
         <limit effort="10000" velocity="1000" />
         <dynamics damping="1.0" friction="1.0" />
     </joint>
+
+    <!-- Camera -->
+    <link name="camera">
+        <xacro:cube_inertial mass="${camera_mass}" edge_length="${camera_edge_length}" />
+
+        <collision name="camera_collision">
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <box size="${camera_edge_length} ${camera_edge_length} ${camera_edge_length}" />
+            </geometry>
+        </collision>
+
+        <visual name="camera_visual">
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <box size="${camera_edge_length} ${camera_edge_length} ${camera_edge_length}" />
+            </geometry>
+        </visual>
+    </link>
+
+    <joint name="camera_joint" type="fixed">
+        <origin xyz="${base_radius} 0 0" rpy="0 0 0" />
+        <parent link="sensors_base" />
+        <child link="camera" />
+        <axis xyz="0 1 0" rpy="0 0 0" />
+    </joint>
+
     <!-- </ROBOT DESCRIPTION> -->
 
 </robot>
