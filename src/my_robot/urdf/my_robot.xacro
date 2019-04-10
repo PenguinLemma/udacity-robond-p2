@@ -17,6 +17,8 @@
     <xacro:property name="base_radius" value="0.4" />
     <xacro:property name="base_height" value="0.1" />
     <xacro:property name="base_mass" value="15.0" />
+    <xacro:property name="camera_base_heigth" value="${(2*wheel_radius - base_height)/2}" />
+    <xacro:property name="camera_base_mass" value="5.0" />
 
     <!-- MACROS -->
 
@@ -130,5 +132,34 @@
     <xacro:wheel side="left" reflect="-1" />
     <xacro:wheel side="right" reflect="1" />
 
+    <!-- Rotating base for the camera -->
+    <link name="camera_base">
+        <xacro:cylinder_inertial
+            mass="${camera_base_mass}" radius="${base_radius}" length="${camera_base_heigth}"
+        />
+
+        <collision name="camera_base_collision">
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <geometry>
+                <cylinder radius="${base_radius}" length="${camera_base_heigth}" />
+            </geometry>
+        </collision>
+
+        <visual name="camera_base_visual">
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <geometry>
+                <cylinder radius="${base_radius}" length="${camera_base_heigth}" />
+            </geometry>
+        </visual>
+    </link>
+
+    <joint name="camera_base_hinge" type="continuous">
+        <origin xyz="0 0 ${1/2*base_height + 1/2*camera_base_heigth}" rpy="0 0 0" />
+        <child link="camera_base" />
+        <parent link="base" />
+        <axis xyz="0 0 1" rpy="0 0 0" />
+        <limit effort="10000" velocity="1000" />
+        <dynamics damping="1.0" friction="1.0" />
+    </joint>
 
 </robot>
