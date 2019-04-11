@@ -2,6 +2,7 @@
 
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
 
+    <!-- COLORS -->
     <!-- blue jeans color to the base -->
     <gazebo reference="base">
         <xacro:material_blue_jeans/>
@@ -23,6 +24,34 @@
     </gazebo>
     <gazebo reference="right_wheel">
         <xacro:material_android_green/>
+    </gazebo>
+
+    <!-- PLUGINS -->
+
+    <!-- Differential drive controller -->
+    <gazebo>
+        <plugin name="differential_drive_controller" filename="libgazebo_ros_diff_drive.so">
+            <legacyMode>false</legacyMode>
+            <alwaysOn>true</alwaysOn>
+            <updateRate>10</updateRate>
+            <leftJoint>left_wheel_hinge</leftJoint>
+            <rightJoint>right_wheel_hinge</rightJoint>
+            <wheelSeparation>${2*base_radius}</wheelSeparation>
+            <wheelDiameter>${2*wheel_radius}</wheelDiameter>
+            <torque>10</torque>
+            <commandTopic>cmd_vel</commandTopic>
+            <odometryTopic>odom</odometryTopic>
+            <odometryFrame>odom</odometryFrame>
+            <robotBaseFrame>robot_footprint</robotBaseFrame>
+            <publishWheelTF>false</publishWheelTF>
+            <publishWheelJointState>false</publishWheelJointState>
+            <rosDebugLevel>na</rosDebugLevel>
+            <wheelAcceleration>0</wheelAcceleration>
+            <wheelTorque>5</wheelTorque>
+            <odometrySource>world</odometrySource>
+            <publishTf>1</publishTf>
+            <publishOdomTF>true</publishOdomTF>
+        </plugin>
     </gazebo>
 
 </robot>
