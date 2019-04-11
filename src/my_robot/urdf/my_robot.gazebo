@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+    <!-- blue jeans color to the base -->
+    <gazebo reference="base">
+        <xacro:material_blue_jeans/>
+    </gazebo>
+
+    <!-- android green color to the sensors' base -->
+    <gazebo reference="sensors_base">
+        <xacro:material_gargoyle_gas/>
+    </gazebo>
+
+    <!-- princeton orange color to the camera -->
+    <gazebo reference="camera">
+        <xacro:material_princeton_orange/>
+    </gazebo>
+
+    <!-- gargoyle gas color to the wheels -->
+    <gazebo reference="left_wheel">
+        <xacro:material_android_green/>
+    </gazebo>
+    <gazebo reference="right_wheel">
+        <xacro:material_android_green/>
+    </gazebo>
+
+</robot>
