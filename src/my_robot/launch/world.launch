@@ -2,7 +2,6 @@
 
 <launch>
 
-
     <!-- Robot pose -->
     <arg name="x" default="0"/>
     <arg name="y" default="0"/>
@@ -26,13 +25,15 @@
     </include>
 
 
-
-
     <!-- Spawn my robot -->
     <node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model"
           respawn="false" output="screen"
           args="-urdf -param robot_description -model my_robot
                 -x $(arg x) -y $(arg y) -z $(arg z)
-                -R $(arg roll) -P $(arg pitch) -Y $(arg yaw)"/>
+                -R $(arg roll) -P $(arg pitch) -Y $(arg yaw)"
+    />
+
+    <node name="rviz" pkg="rviz" type="rviz" respawn="false" />
+
 
 </launch>
