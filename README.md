@@ -17,15 +17,23 @@ catkin_make
 ```
 
 3. Set the needed environment variables
-```
+```shell
 source devel/setup.$SHELL
 ```
 where $SHELL can be "sh", "bash" or "zsh".
+
+In case of using ROS Melodic, the following command is also necessary:
+```shell
+export LC_NUMERIC="en_US.UTF-8"
+```
+This is due to: https://github.com/ros-visualization/rviz/issues/1249
 
 4. Launch the world
 ```
 roslaunch my_robot world.launch
 ```
+
+
 
 ## License
 Original version of the license of this repository can be found here:
