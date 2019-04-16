@@ -1,11 +1,8 @@
 #!/usr/bin/env bash
-# To initialize the catkin_workspace and set some environment variables
-# that are necessary.
+# To set some environment variables that are necessary to use
+# ros commands and use launch files in this project
 
-# Build the catkin ws
-catkin_make
-
-# Set the needed environment variables
+# Set the environment variables that catkin_build generates
 source devel/setup.bash
 # Add path where models in the world can be found
 export GAZEBO_MODEL_PATH=$PWD/src/my_robot/worlds/model:~/.gazebo/models:$GAZEBO_MODEL_PATH

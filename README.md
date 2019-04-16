@@ -13,15 +13,25 @@ git clone https://github.com/PenguinLemma/udacity-robond-p1.git PenguinLemmaRobo
 
 ```shell
 cd PenguinLemmaRoboND_P2
-source init_$VERSION.$SHELL
+catkin_make
+source set_env_var_$VERSION.$SHELL
 ```
 where $SHELL can be "sh", "bash" or "zsh" and $VERSION can be "pre_melodic" or "melodic".
+
+For each new terminal we need to open, we will have to do
+```shell
+cd $PATH_TO_PARENT_DIR/PenguinLemmaRoboND_P2
+source set_env_var_$VERSION.$SHELL
+```
 
 3. Launch the world
 ```
 roslaunch my_robot world.launch
 ```
-
+4. Launch ball_chaser nodes
+```
+roslaunch ball_chaser ball_chaser.launch
+```
 
 
 ## License

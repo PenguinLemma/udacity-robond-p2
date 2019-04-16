@@ -1,11 +1,8 @@
 #!/usr/bin/env sh
-# To initialize the catkin_workspace and set some environment variables
-# that are necessary.
+# To set some environment variables that are necessary to use
+# ros commands and use launch files in this project
 
-# Build the catkin ws
-catkin_make
-
-# Set the needed environment variables
+# Set the environment variables that catkin_build generates
 source devel/setup.sh
 # In case of using ROS Melodic, the following command is also necessary,
 # due to: https://github.com/ros-visualization/rviz/issues/1249
