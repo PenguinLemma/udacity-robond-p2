@@ -47,11 +47,10 @@ find_package(catkin REQUIRED COMPONENTS
 ##   * add every package in MSG_DEP_SET to generate_messages(DEPENDENCIES ...)
 
 ## Generate messages in the 'msg' folder
-# add_message_files(
-#   FILES
-#   Message1.msg
-#   Message2.msg
-# )
+add_message_files(
+  FILES
+  HorizontalLocation.msg
+)
 
 ## Generate services in the 'srv' folder
 add_service_files(
@@ -104,7 +103,7 @@ generate_messages(
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES ball_chaser
-#  CATKIN_DEPENDS message_generation roscpp std_msgs
+  CATKIN_DEPENDS message_runtime
 #  DEPENDS system_lib
 )
 
@@ -200,3 +199,7 @@ include_directories(
 add_executable(drive_bot src/drive_bot.cpp)
 target_link_libraries(drive_bot ${catkin_LIBRARIES})
 add_dependencies(drive_bot drive_bot_generate_messages_cpp)
+
+add_executable(process_image src/process_image.cpp)
+target_link_libraries(process_image ${catkin_LIBRARIES})
+add_dependencies(process_image drive_bot_generate_messages_cpp)
