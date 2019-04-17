@@ -9,19 +9,26 @@ class BotDriver
 {
     ros::Publisher motor_command_publisher_;
 
+    // Handles drive request whenever the service "/ball_chaser/command_robot" is called
+    bool PerformDriveRequest(ball_chaser::DriveToTarget::Request& req,
+                             ball_chaser::DriveToTarget::Response& res);
+
 public:
     BotDriver() {}
     // Run the bot driver
     void Run();
 
-    // Handles drive request whenever the service "/ball_chaser/command_robot" is called
-    bool PerformDriveRequest(ball_chaser::DriveToTarget::Request& req,
-                             ball_chaser::DriveToTarget::Response& res);
+
 };
 
 void BotDriver::Run()
 {
     ros::NodeHandle nodeh;
+
+    // Define drive /ball_chaser/command_robot service
+    ros::ServiceServer service = nodeh.advertiseService("/ball_chaser/command_robot",
+                                                        &BotDriver::PerformDriveRequest,
+                                                        this);
 
     // Inform ROS master that we will be publishing a message of type geometry_msgs::Twist
     // on the robot actuation topic with a publishing queue size of 10
@@ -71,12 +78,6 @@ int main(int argc, char** argv)
 
     // Initialize bot driver
     BotDriver driver;
-
-    // Define drive /ball_chaser/command_robot service
-    ros::NodeHandle nodeh;
-    ros::ServiceServer service = nodeh.advertiseService("/ball_chaser/command_robot",
-                                                        &BotDriver::PerformDriveRequest,
-                                                        &driver);
 
     // Run driver
     driver.Run();
