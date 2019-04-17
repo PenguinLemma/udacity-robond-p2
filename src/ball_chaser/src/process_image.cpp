@@ -8,23 +8,35 @@ double GetRelativeHorizontalPosition(int column, int num_row_pixels)
 {
     int midpoint = num_row_pixels / 2;
     // Correction to get symmetric values for even number of pixels\
-    // in a row. In this case, the result can't be 0, but +-k/midpoint,
-    // for k = 1, ..., midpoint
-    if(num_row_pixels % 2 == 0 and column > num_row_pixels)
-        ++column;
+    // in a row. In this case, the result will +-k/(midpoint-1), for
+    // k = 0, ..., midpoint-1, mapping the two central columns to 0
+    if(num_row_pixels % 2 == 0)
+    {
+        --midpoint;
+        if(column > num_row_pixels)
+            --column;
+    }
     return static_cast<double>(column - midpoint)/static_cast<double>(midpoint);
-
 }
 
+
+// Processes image and publishes horizontal relative position
+// of first white pixel found. Values of horizontal relative
+// position range from -1 to 1, with 0 corresponding to the
+// middle column (or pair of columns if the number of pixels
+// per row is even). In the case the bool in published message
+// is set to false (there was no white pixel), horizontal
+// relative position should be ignored.
+// Message type is ball_chaser::HorizontalLocation
+// Topic it is published into is "/ball_chaser/ball_hor_loc"
 class ImageProcessor
 {
     ros::Publisher location_publisher_;
-
     void ProcessImageCallback(const sensor_msgs::Image& img);
 
 public:
     ImageProcessor() {}
-    // Run the bot driver
+    // Run the image processor
     void Run();
 
 
@@ -48,11 +60,8 @@ void ImageProcessor::Run()
     ros::spin();
 }
 
-// TODO WRITE THIS
 void ImageProcessor::ProcessImageCallback(const sensor_msgs::Image& img)
 {
-
-    // Create a motor_command object of type geometry_msgs::Twist
     ball_chaser::HorizontalLocation hloc;
 
     uint8_t saturated_color_component{255};
@@ -82,14 +91,14 @@ void ImageProcessor::ProcessImageCallback(const sensor_msgs::Image& img)
     hloc.contains_object = is_there_white_pixel;
     hloc.horizontal_relative_position = rel_pos_white_pixel;
 
-    // Publish angles to drive the robot
+    // Publish horizontal location
     location_publisher_.publish(hloc);
 }
 
 int main(int argc, char** argv)
 {
     // Initialize a ROS node
-    ros::init(argc, argv, "drive_bot");
+    ros::init(argc, argv, "process_image");
 
     // Initialize image processor
     ImageProcessor processor;
