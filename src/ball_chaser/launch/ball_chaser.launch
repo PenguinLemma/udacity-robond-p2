@@ -3,4 +3,9 @@
     <!-- drive_bot node -->
     <node name="drive_bot" type="drive_bot" pkg="ball_chaser" output="screen" />
 
+    <!-- process_image node -->
+    <node name="process_image" type="process_image" pkg="ball_chaser" output="screen" />
+
+    <!-- chase_ball node -->
+    <node name="chase_ball" type="chase_ball" pkg="ball_chaser" output="screen" />
 </launch>
