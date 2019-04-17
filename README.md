@@ -35,6 +35,11 @@ roslaunch my_robot world.launch
 roslaunch ball_chaser ball_chaser.launch
 ```
 
+## Future improvements
+
+- [ ] Resize robot (chasis and sensors base radius, mainly) so that it fits through the doors ^^
+- [ ] In chase_ball.cpp, in the case the ball was not found in the image, scan surroundings (set angular_z velocity to positive). After a full turn, if it's still not found, move randomly and remember to not scan surroundings for a while, to avoid ballroom dancing.
+- [ ] Extract "scan_surroundings" and "go_somewhere_else" as actions
 
 ## License
 Original version of the license of this repository can be found here:
