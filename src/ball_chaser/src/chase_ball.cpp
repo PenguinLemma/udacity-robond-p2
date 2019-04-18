@@ -3,17 +3,15 @@
 #include "ros/duration.h"
 #include "ball_chaser/DriveToTarget.h"
 #include "ball_chaser/HorizontalLocation.h"
+#include "ball_chaser/robot_status.hpp"
+
 
 class BallChaser
 {
     ros::ServiceClient drive_srv_client_;
-    ros::Time time_start_scanning_;
-    ros::Time time_robot_stopped_;
+    RobotStatus robot_status_;
     bool is_ball_found_;
     bool are_surroudings_scanned_;
-    bool is_scanning_ongoing_;
-    bool is_robot_stopped_;
-    bool is_stopping_time_set_;
 
     // Callback for the subscription to /ball_chaser/ball_hor_loc.
     // If ball was found in the image, it commands the drive_bot
@@ -26,10 +24,7 @@ class BallChaser
 public:
     BallChaser() :
         is_ball_found_{false},
-        are_surroudings_scanned_{false},
-        is_scanning_ongoing_{false},
-        is_robot_stopped_{true},
-        is_stopping_time_set_{false}
+        are_surroudings_scanned_{false}
     {}
     // Run the ball chaser
     void Run();
@@ -67,9 +62,7 @@ void BallChaser::LocateBallCallback(const ball_chaser::HorizontalLocation& hloc)
             is_ball_found_ = true;
         }
         are_surroudings_scanned_ = false;
-        is_scanning_ongoing_ = false;
-        is_robot_stopped_ = false;
-        is_stopping_time_set_ = false;
+        robot_status_.SetToChasing();
 
         double hor_pos = hloc.horizontal_relative_position;
         double sign = 1.0;
@@ -113,6 +106,8 @@ void BallChaser::LocateBallCallback(const ball_chaser::HorizontalLocation& hloc)
     }
     else
     {
+        if (robot_status_.IsChasing())
+            robot_status_.SetToStop();
         LookForWhiteBall(linear_x_vel, angular_z_vel);
     }
 
@@ -129,75 +124,44 @@ void BallChaser::LocateBallCallback(const ball_chaser::HorizontalLocation& hloc)
 
 void BallChaser::LookForWhiteBall(double& linear_x, double& angular_z)
 {
-    // If the robot is static and hasn't been static for more than
-    // 2 seconds, it stays static
-    if(is_robot_stopped_)
-    {
-        if(not is_stopping_time_set_)
-        {
-            if(ros::Time::isValid())
-            {
-                time_robot_stopped_ = ros::Time::now();
-                is_stopping_time_set_ = true;
-            }
-            else
-            {
-                linear_x = 0.0;
-                angular_z = 0.0;
-                return;
-            }
-        }
+    const double rotation_std_angular_z_velocity = 0.5;
 
-        ros::Duration time_stopped = time_robot_stopped_ - ros::Time::now();
-        if(time_stopped.toSec() < 2.0)
+    // If the robot is static and hasn't been static for more than
+    // 2 seconds, it stays static. If it was stopped for longer,
+    // we start scanning
+    if(robot_status_.IsStopped())
+    {
+        if (robot_status_.TimeStoppedInSeconds() < 2.0)
         {
             linear_x = 0.0;
             angular_z = 0.0;
+            robot_status_.SetToStop();
             return;
+        }
+        else
+        {
+            robot_status_.SetToScanning();
         }
     }
 
-    const double rotation_std_angular_z_velocity = 0.5;
     if(not are_surroudings_scanned_)
     {
         linear_x = 0.0;
         angular_z = rotation_std_angular_z_velocity;
-        is_robot_stopped_ = false;
-        is_stopping_time_set_ = false;
 
-        if (not is_scanning_ongoing_)
-        {
-            time_start_scanning_ = ros::Time::now();
-            is_scanning_ongoing_ = true;
-        }
-        else
-        {
-            ros::Duration time_lapsed_scanning = ros::Time::now() - time_start_scanning_;
-            double angle_rotated = time_lapsed_scanning.toSec() * rotation_std_angular_z_velocity;
+        double angle_rotated = robot_status_.TimeScanningInSeconds() * rotation_std_angular_z_velocity;
 
-            // If the robot made a full scanned (since we are here, that means
-            // the ball was still not found), we stop the scan and the robot.
-            if(angle_rotated > 2 * M_PI)
-            {
-                are_surroudings_scanned_ = true;
-                is_scanning_ongoing_ = false;
-                angular_z = 0.0;
-                time_robot_stopped_ = ros::Time::now();
-                is_stopping_time_set_ = true;
-                is_robot_stopped_ = true;
-            }
+        if(angle_rotated > 2 * M_PI)
+        {
+            are_surroudings_scanned_ = true;
+
         }
     }
     else
     {
         linear_x = 0.0;
         angular_z = 0.0;
-        if(not is_robot_stopped_)
-        {
-            time_robot_stopped_ = ros::Time::now();
-            is_stopping_time_set_ = true;
-            is_robot_stopped_ = true;
-        }
+        robot_status_.SetToStop();
     }
 }
 
