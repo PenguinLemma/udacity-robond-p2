@@ -36,7 +36,9 @@
             <updateRate>10</updateRate>
             <leftJoint>left_wheel_hinge</leftJoint>
             <rightJoint>right_wheel_hinge</rightJoint>
-            <wheelSeparation>${2*base_radius}</wheelSeparation>
+            <!-- Wheel separation is the distance between the opposite faces
+                 of the wheels -->
+            <wheelSeparation>${2*base_radius + 2*wheel_length}</wheelSeparation>
             <wheelDiameter>${2*wheel_radius}</wheelDiameter>
             <torque>10</torque>
             <commandTopic>cmd_vel</commandTopic>
