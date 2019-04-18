@@ -3,6 +3,46 @@
 # udacity-robond-p2
 Go Chase It! - Project 2 of the Udacity Robotics Software Engineer Nanodegree
 
+## Description
+
+This project contains:
+1. Two-wheeled robot that:
+  - supports differential drive (and is stable)
+  - is housed in the world created in [Build My World](https://github.com/PenguinLemma/udacity-robond-p1 "RoboND Project 1 - PenguinLemma")
+  - is equiped with a camera and a lidar
+2. White ball that will be chased by the robot
+3. C++ source code of nodes that will command the robot to chase the ball, in the case the camera is seeing the ball.
+
+As an extra feature, in the case the ball is not being seen by the camera, the robot is commanded to rotate scanning its surroundings until the camera captures the ball or a full turn has been made. Scanning will only happen after the robot is stopped for 2 seconds and it won't repeat until after the robot chased the ball.
+
+### Robot
+
+The robot consists on:
+- A cylindrical base (chassis) with two caster balls to provide stability
+- Two wheels joint by continuous joints to opposite points of the chassis situated in an axis that is orthogonal to the axis formed by the centers of the two caster balls.
+- A basis for the sensors, which is a cylinder of the same radius than the chassis joint to it with a continuous joint (in the center of the two touching circular faces of sensor basis and chassis). The idea behind it is that if the scan of the surroundings is extracted as an action, we can rotate the sensors platform instead of rotating the robot, and then align the robot with the camera in the case the ball was found. This way, the node in charge of scanning would only need to interact with the joint in the sensors basis.
+- Front camera
+- Lidar (hokuyo)
+
+((Insert here gif from video showing robot))
+
+### Nodes
+
+1. `chase_ball` is the main node that will decide whether to stop, scan or chase the ball based on the output of node `process_image`, and command the robot consequently.
+
+2. `drive_bot` publishes the right `geometry_msgs/Twist` message to the `differential_drive_controller` whenever the service `/ball_chaser/command_robot` is requested.
+
+3. `process_image` scans raw images published by the camera (it subscribes to topic `/camera/rgb/image_raw`) and publishes the horizontal relative position of the ball in the image to the topic `/ball_chaser/ball_hor_loc`. This message is of type `ball_chaser::HorizontalLocation`:
+  ```
+  # Message containing information about horizontal location of
+  # an object in an image
+  bool contains_object
+  float64 horizontal_relative_position
+  ```
+   The horizontal relative position of a pixel in an image is its position with respect to the vertical line that crosses the image by its half, scaled to be in [-1, 1].
+
+Calls to service `/ball_chaser/command_robot` were moved from `process_image` to `chase_ball` in order to isolate the decision/command process from the environment analysis (processing of the image).
+
 ## Instructions
 
 1. Clone the repository
@@ -20,27 +60,35 @@ source set_env_var_$VERSION.$SHELL
 ```
 where $SHELL can be "sh", "bash" or "zsh" and $VERSION can be "pre_melodic" or "melodic".
 
-For each new terminal we need to open, we will have to do
+3. Launch the world
+```shell
+roslaunch my_robot world.launch
+```
+4. Launch ball_chaser nodes in a new terminal
 ```shell
 cd $PATH_TO_PARENT_DIR/PenguinLemmaRoboND_P2
 source set_env_var_$VERSION.$SHELL
-```
-
-3. Launch the world
-```
-roslaunch my_robot world.launch
-```
-4. Launch ball_chaser nodes
-```
 roslaunch ball_chaser ball_chaser.launch
 ```
+5. Run rqt_image_view in a new terminal to see what the camera sees
+```shell
+cd $PATH_TO_PARENT_DIR/PenguinLemmaRoboND_P2
+source set_env_var_$VERSION.$SHELL
+rosrun rqt_image_view rqt_image_view
+```
+You can also use the RViz window that is already launched together with the gazebo simulation.
+
+6. Drop the ball
+In gazebo, click on `insert` and then select `my_ball`. Drop it somewhere in the world (preferably in sight of the robot) and move it around to see how the robot reacts to the different situations. Don't worry, be cheeky! :)
+
 
 ## Future improvements
 
-- [ ] Add namespaces
-- [ ] Extract constants
+- [ ] Add namespaces in nodes' source code
+- [ ] Extract constants in nodes' source code
 - [ ] Resize robot (chasis and sensors base radius, mainly) so that it fits through the doors ^^
-- [ ] In chase_ball.cpp, in the case the ball was not found in the image, scan surroundings (set angular_z velocity to positive). After a full turn, if it's still not found, move randomly and remember to not scan surroundings for a while, to avoid ballroom dancing.
+- [x] In chase_ball.cpp, in the case the ball was not found in the image, scan surroundings (set angular_z velocity to positive). After a full turn, if it's still not found, stop the robot.
+- [ ] As in previous point, but after the fulll scan, if ball is still not found move randomly and remember to not scan surroundings for a while, to avoid ballroom dancing.
 - [ ] Extract "scan_surroundings" and "go_somewhere_else" as actions
 
 ## License
