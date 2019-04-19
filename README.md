@@ -24,7 +24,9 @@ The robot consists on:
 - Front camera
 - Lidar (hokuyo)
 
-![Robot overview](doc/robot_overview.gif)
+<p align="center">
+  <img src="doc/robot_overview.gif">
+</p>
 
 ### Nodes
 
@@ -48,7 +50,9 @@ Calls to service `/ball_chaser/command_robot` were moved from `process_image` to
 1. Ball is seen by camera
    In this case, the robot will drive towards the ball, turning left of right based on the relative horizontal position of the ball in the image.
 
-((Insert here gif from video showing this behaviour))
+<p align="center">
+  <img src="doc/chasing.gif">
+</p>
 
 2. Ball is not seen by the camera
    Robot remains static for 2 seconds. After that, it starts rotating to scan its surroundings.
