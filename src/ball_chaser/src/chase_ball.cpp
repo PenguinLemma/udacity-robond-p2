@@ -124,7 +124,7 @@ void BallChaser::LocateBallCallback(const ball_chaser::HorizontalLocation& hloc)
 
 void BallChaser::LookForWhiteBall(double& linear_x, double& angular_z)
 {
-    const double rotation_std_angular_z_velocity = 0.5;
+    const double rotation_std_angular_z_velocity = 0.85;
 
     // If the robot is static and hasn't been static for more than
     // 2 seconds, it stays static. If it was stopped for longer,
