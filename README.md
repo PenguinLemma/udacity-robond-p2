@@ -57,6 +57,9 @@ Calls to service `/ball_chaser/command_robot` were moved from `process_image` to
 2. Ball is not seen by the camera
    Robot remains static for 2 seconds. After that, it starts rotating to scan its surroundings.
       - If at some point the ball is perceived by the camera, the robot will start chasing the ball again (as in 1).
+      <p align="center">
+        <img src="doc/full_scan.gif">
+      </p>
       - If the robot makes a full rotation without finding the ball, it will remain static until exposed to the ball (i.e. it won't scan again the surroundings and nothing will happen unless the ball is put in sight of the standing robot).
 
 ((Insert here gifs from videos showing these behaviours))
