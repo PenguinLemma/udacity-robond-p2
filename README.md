@@ -24,7 +24,7 @@ The robot consists on:
 - Front camera
 - Lidar (hokuyo)
 
-((Insert here gif from video showing robot))
+![Robot overview](doc/robot_overview.gif)
 
 ### Nodes
 
