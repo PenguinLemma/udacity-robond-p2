@@ -106,11 +106,16 @@ In gazebo, click on `insert` and then select `my_ball`. Drop it somewhere in the
 
 ## Future improvements
 
+- [ ] Include white sphere in the world
+- [ ] Change piece-wise defined angular velocity function to a simpler one using `tanh`
 - [ ] Add namespaces in nodes' source code
 - [ ] Extract constants in nodes' source code
+- [ ] Extract some of those constants as parameters and use ROS' parameter server
+- [ ] Use relative vertical position of the lowest white pixel as means of distance to sphere and stop the robot when it's close enough to the target
 - [ ] Resize robot (chasis and sensors base radius, mainly) so that it fits through the doors ^^
 - [x] In chase_ball.cpp, in the case the ball was not found in the image, scan surroundings (set angular_z velocity to positive). After a full turn, if it's still not found, stop the robot.
 - [ ] As in previous point, but after the fulll scan, if ball is still not found move randomly and remember to not scan surroundings for a while, to avoid ballroom dancing.
+- [ ] Use `opencv` to detect spheres of any give color and find their centroid
 - [ ] Extract "scan_surroundings" and "go_somewhere_else" as actions
 
 ## License
