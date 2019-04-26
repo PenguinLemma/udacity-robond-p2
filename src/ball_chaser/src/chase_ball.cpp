@@ -1,3 +1,4 @@
+#include <cmath>
 #include "ros/ros.h"
 #include "ros/time.h"
 #include "ros/duration.h"
@@ -69,39 +70,41 @@ void BallChaser::LocateBallCallback(const ball_chaser::HorizontalLocation& hloc)
         if (hor_pos < 0.0)
             sign = -1.0;
 
-        if(fabs(hor_pos) > turning_threshold)
-        {
-            linear_x_vel = 0.5;
-            angular_z_vel = max_angular_vel * sign;
-        }
-        else
-        {
-            // We want angular_z to be a function of hor_pos that goes
-            // smoothly from 0 to max_angular_vel in the interval
-            // s[0, turning_threshold].
-            // We also would like angular_z to have derivatives
-            // in the extremes close to 0, so that:
-            //   a) It glues smoothly to the constant function described
-            //      in the case hor_pos > turning_threshold
-            //   b) For values of hor_pos close enough to 0, there is not
-            //      much variation of angular_z, so that there is no rapid
-            //      oscillarions and we are as close as driving in straight
-            //      line as possible
-            //   c) We can mirror for [-turning_threshold, 0]
-            // Function f(x) = (1 + 2*x / (x^2 + 1))/2 behaves this exact way
-            // in [-1, 1] (with max at 1), so all we need to do is:
-            //   1) Multiply f by max_angular_vel
-            //   2) substitute x by the right
-            //      transformation g(hor_pos) that sends [0, turning_threshold]
-            //      to [-1, 1]
-            double x = 2.0 * fabs(hor_pos) / turning_threshold - 1.0;
-            angular_z_vel = sign * max_angular_vel * (1.0 + 2 * x / (x * x + 1.0)) / 2.0;
 
-            // In the case of the linear velocity on x, we just take a
-            // parabole with respect to hor_pos so that less we need to turn,
-            // the faster we can move.
+
+        // We want angular_z to be a function of hor_pos that goes
+        // smoothly from 0 to max_angular_vel in the interval
+        // s[0, 1], and such that most of its change happens around
+        // turning_threshold.
+        // We also would like angular_z to have derivatives
+        // in the extremes close to 0, so that:
+        //   a) It glues smoothly to the constant function described
+        //      in the case hor_pos > turning_threshold
+        //   b) For values of hor_pos close enough to 0, there is not
+        //      much variation of angular_z, so that there is no rapid
+        //      oscillarions and we are as close as driving in straight
+        //      line as possible
+        //   c) We can mirror for [-turning_threshold, 0]
+        // Function f(x) = (1 + tanh(4*x))/2 behaves this exact way
+        // in [-2, 2] (with horizontal asymptote angular_z = 1), so all we need to do is:
+        //   1) Multiply f by max_angular_vel
+        //   2) substitute x by the right
+        //      transformation g(hor_pos) that sends [0 turning_threshold]
+        //      to [-2, 0]
+        // For example, for turning_threshold = 0.3 and max_angular_vel = 0.5,
+        // we can see the graph of the absolute value of angular_z here:
+        // https://www.wolframalpha.com/input/?i=0.5*(1+%2B+tanh(4*(2*abs(x)%2F0.3+-+2)))%2F2+from+-1+to+1
+        double x = 2.0 * fabs(hor_pos) / turning_threshold - 2.0;
+        angular_z_vel = sign * max_angular_vel * (1.0 + std::tanh(2 * x)) / 2.0;
+
+        // In the case of the linear velocity on x, we just take a
+        // parabole with respect to hor_pos so that less we need to turn,
+        // the faster we can move and constant to 0.5 when the horizonal
+        // relative position is beyond the turning_threshold
+        if(fabs(hor_pos) > turning_threshold)
+            linear_x_vel = 0.5;
+        else
             linear_x_vel = 1.0 - 0.5 * hor_pos * hor_pos / turning_threshold_sq;
-        }
 
     }
     else
