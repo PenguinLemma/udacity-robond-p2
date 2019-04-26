@@ -106,7 +106,7 @@ In gazebo, click on `insert` and then select `my_ball`. Drop it somewhere in the
 
 ## Future improvements
 
-- [ ] Include white sphere in the world
+- [x] Include white sphere in the world at spawn
 - [ ] Change piece-wise defined angular velocity function to a simpler one using `tanh`
 - [ ] Add namespaces in nodes' source code
 - [ ] Extract constants in nodes' source code

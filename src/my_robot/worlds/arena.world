@@ -33,6 +33,13 @@
             <pose>5 -4 0.5 0 0 3.1416</pose>
         </include>
 
+        <!-- White ball -->
+        <include>
+            <uri>model://my_ball</uri>
+            <name>white_ball</name>
+            <pose>0 3 0 0 0 0</pose>
+        </include>
+
 
         <!-- Light -->
         <light name='sun' type='directional'>
