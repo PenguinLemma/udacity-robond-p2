@@ -108,7 +108,7 @@ rosrun rqt_image_view rqt_image_view
 You can also use the RViz window that is already launched together with the gazebo simulation.
 
 6. Drop the ball
-In gazebo, click on `insert` and then select `my_ball`. Drop it somewhere in the world (preferably in sight of the robot) and move it around to see how the robot reacts to the different situations. Don't worry, be cheeky! :)
+The ball is initially hidden from the robot, move it where it can find it. Don't worry, be cheeky! :)
 
 
 ## Future improvements
