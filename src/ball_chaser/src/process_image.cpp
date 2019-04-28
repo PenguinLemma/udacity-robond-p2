@@ -4,19 +4,20 @@
 
 #include <string>
 
-double GetNormalizedComponent(int index, int num_pixels_chosen_dim)
+double GetNormalizedComponent(int index, int num_pixels_chosen_dim, bool is_order_reversed = false)
 {
     int midpoint = num_pixels_chosen_dim / 2;
     // Correction to get symmetric values for even number of pixels\
-    // in a row. In this case, the result will +-k/(midpoint-1), for
-    // k = 0, ..., midpoint-1, mapping the two central columns to 0
+    // in a row/column. In this case, the result will +-k/(midpoint-1),
+    // for k = 0, ..., midpoint-1, mapping the two central columns to 0
     if(num_pixels_chosen_dim % 2 == 0)
     {
         --midpoint;
-        if(index > num_pixels_chosen_dim)
+        if(index > midpoint)
             --index;
     }
-    return static_cast<double>(index - midpoint)/static_cast<double>(midpoint);
+    double norm_comp = static_cast<double>(index - midpoint)/static_cast<double>(midpoint);
+    return is_order_reversed ? -norm_comp : norm_comp;
 }
 
 
@@ -86,11 +87,14 @@ void ImageProcessor::ProcessImageCallback(const sensor_msgs::Image& img)
               && img.data[index_raw_data + blue_byte_offset] == saturated_color_component)
             {
                 is_there_white_pixel = true;
+                const bool is_order_reversed_vertical = true;
                 hor_pos_white_pixel = GetNormalizedComponent(column, img.step);
-                ver_pos_white_pixel = GetNormalizedComponent(row, img.height);
+                ver_pos_white_pixel = GetNormalizedComponent(row, img.height, is_order_reversed_vertical);
                 break;
             }
         }
+        if (is_there_white_pixel)
+            break;
     }
 
     // In the case there is no white pixel, normalized position

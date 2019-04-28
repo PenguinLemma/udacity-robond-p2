@@ -52,9 +52,11 @@ void BallChaser::LocateBallCallback(const ball_chaser::NormalizedPosition& pos)
 {
     double linear_x_vel{1.0};
     double angular_z_vel{0.0};
-    double max_angular_vel{0.5};
-    double turning_threshold = 0.2;
-    double turning_threshold_sq = turning_threshold * turning_threshold;
+    const double max_angular_vel{0.5};
+    const double proximity_threshold_reduce{-0.6};
+    const double proximity_threshold_stop{-0.8};
+    const double turning_threshold = 0.2;
+    const double turning_threshold_sq = turning_threshold * turning_threshold;
     if(pos.contains_object)
     {
         if (not is_ball_found_)
@@ -65,7 +67,8 @@ void BallChaser::LocateBallCallback(const ball_chaser::NormalizedPosition& pos)
         are_surroudings_scanned_ = false;
         robot_status_.SetToChasing();
 
-        double hor_pos = pos.horizontal;
+        const double hor_pos = pos.horizontal;
+        const double ver_pos = pos.vertical;
         double sign = 1.0;
         if (hor_pos < 0.0)
             sign = -1.0;
@@ -97,14 +100,30 @@ void BallChaser::LocateBallCallback(const ball_chaser::NormalizedPosition& pos)
         double x = 2.0 * fabs(hor_pos) / turning_threshold - 2.0;
         angular_z_vel = sign * max_angular_vel * (1.0 + std::tanh(2 * x)) / 2.0;
 
-        // In the case of the linear velocity on x, we just take a
-        // parabole with respect to hor_pos so that less we need to turn,
-        // the faster we can move and constant to 0.5 when the horizonal
-        // normalized position is beyond the turning_threshold
-        if(fabs(hor_pos) > turning_threshold)
-            linear_x_vel = 0.5;
+        // If the white pixel found is too close to the bottom of the image,
+        // we don't move forward anymore
+        if (ver_pos < proximity_threshold_stop)
+        {
+            linear_x_vel = 0.0;
+        }
         else
-            linear_x_vel = 1.0 - 0.5 * hor_pos * hor_pos / turning_threshold_sq;
+        {
+            // We take a parabole with respect to hor_pos so that
+            // less we need to turn, the faster we can move and
+            // constant to 0.5 when the horizonal normalized position
+            // is beyond the turning_threshold.
+            if(fabs(hor_pos) > turning_threshold)
+                linear_x_vel = 0.5;
+            else
+                linear_x_vel = 1.0 - 0.5 * hor_pos * hor_pos / turning_threshold_sq;
+
+            // We reduce in the case we are getting close to the ball
+            if (ver_pos < proximity_threshold_reduce)
+            {
+                linear_x_vel *= (proximity_threshold_stop - ver_pos)
+                             /  (proximity_threshold_stop - proximity_threshold_reduce);
+            }
+        }
 
     }
     else
