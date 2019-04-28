@@ -42,7 +42,7 @@ The robot consists on:
   float64 horizontal
   float64 vertical
   ```
-   The horizontal component of the normalized position of a pixel in an image is its position with respect to the vertical line that crosses the image by its half, scaled to be in [-1, 1]. The definition of the vertical component is analogous, using in this case the horizontal line that crosse the image by its half as reference.
+   The horizontal component of the normalized position of a pixel in an image is its position with respect to the vertical line that crosses the image by its half, scaled to be in [-1, 1]. The definition of the vertical component is analogous, using in this case the horizontal line that crosses the image by its half as reference.
 
 Calls to service `/ball_chaser/command_robot` were moved from `process_image` to `chase_ball` in order to isolate the decision/command process from the environment analysis (processing of the image).
 
@@ -53,6 +53,12 @@ Calls to service `/ball_chaser/command_robot` were moved from `process_image` to
 
   <p align="center">
     <img src="doc/chasing.gif">
+  </p>
+
+  When the robot is close enough to the ball, it will stop approaching.
+
+  <p align="center">
+    <img src="doc/stop_when_close.gif">
   </p>
 
 2. Ball is not seen by the camera
@@ -109,7 +115,7 @@ In gazebo, click on `insert` and then select `my_ball`. Drop it somewhere in the
 
 - [x] Include white sphere in the world at spawn
 - [x] Change piece-wise defined angular velocity function to a simpler one using `tanh`
-- [ ] Use relative vertical position of the lowest white pixel as means of distance to sphere and stop the robot when it's close enough to the target
+- [x] Use relative vertical position of the lowest white pixel as means of distance to sphere and stop the robot when it's close enough to the target
 - [ ] Add namespaces in nodes' source code
 - [ ] Extract constants in nodes' source code
 - [ ] Extract some of those constants as parameters and use ROS' parameter server
