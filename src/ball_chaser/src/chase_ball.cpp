@@ -3,7 +3,7 @@
 #include "ros/time.h"
 #include "ros/duration.h"
 #include "ball_chaser/DriveToTarget.h"
-#include "ball_chaser/HorizontalLocation.h"
+#include "ball_chaser/NormalizedPosition.h"
 #include "ball_chaser/robot_status.hpp"
 
 
@@ -18,7 +18,7 @@ class BallChaser
     // If ball was found in the image, it commands the drive_bot
     // (through service /ball_chaser/command_robot) to drive towards
     // the ball
-    void LocateBallCallback(const ball_chaser::HorizontalLocation& hloc);
+    void LocateBallCallback(const ball_chaser::NormalizedPosition& pos);
 
     void LookForWhiteBall(double& linear_x, double& angular_z);
 
@@ -38,9 +38,9 @@ void BallChaser::Run()
     // Specify service and type of message of the client
     drive_srv_client_ = nodeh.serviceClient<ball_chaser::DriveToTarget>("/ball_chaser/command_robot");
 
-    // Subscribe to /ball_chaser/ball_hor_loc topic to read the horizontal
-    // relative location of the ball as seen from the camera
-    ros::Subscriber sub_hloc = nodeh.subscribe("/ball_chaser/ball_hor_loc", 10,
+    // Subscribe to /ball_chaser/ball_norm_position topic to read the
+    // normalized position of the ball as seen from the camera
+    ros::Subscriber sub_hloc = nodeh.subscribe("/ball_chaser/ball_norm_position", 10,
                                                 &BallChaser::LocateBallCallback,
                                                 this);
 
@@ -48,14 +48,14 @@ void BallChaser::Run()
     ros::spin();
 }
 
-void BallChaser::LocateBallCallback(const ball_chaser::HorizontalLocation& hloc)
+void BallChaser::LocateBallCallback(const ball_chaser::NormalizedPosition& pos)
 {
     double linear_x_vel{1.0};
     double angular_z_vel{0.0};
     double max_angular_vel{0.5};
     double turning_threshold = 0.2;
     double turning_threshold_sq = turning_threshold * turning_threshold;
-    if(hloc.contains_object)
+    if(pos.contains_object)
     {
         if (not is_ball_found_)
         {
@@ -65,7 +65,7 @@ void BallChaser::LocateBallCallback(const ball_chaser::HorizontalLocation& hloc)
         are_surroudings_scanned_ = false;
         robot_status_.SetToChasing();
 
-        double hor_pos = hloc.horizontal_relative_position;
+        double hor_pos = pos.horizontal;
         double sign = 1.0;
         if (hor_pos < 0.0)
             sign = -1.0;
@@ -100,7 +100,7 @@ void BallChaser::LocateBallCallback(const ball_chaser::HorizontalLocation& hloc)
         // In the case of the linear velocity on x, we just take a
         // parabole with respect to hor_pos so that less we need to turn,
         // the faster we can move and constant to 0.5 when the horizonal
-        // relative position is beyond the turning_threshold
+        // normalized position is beyond the turning_threshold
         if(fabs(hor_pos) > turning_threshold)
             linear_x_vel = 0.5;
         else

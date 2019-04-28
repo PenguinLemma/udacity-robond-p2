@@ -34,21 +34,22 @@ The robot consists on:
 
 2. `drive_bot` publishes the right `geometry_msgs/Twist` message to the `differential_drive_controller` whenever the service `/ball_chaser/command_robot` is requested.
 
-3. `process_image` scans raw images published by the camera (it subscribes to topic `/camera/rgb/image_raw`) and publishes the horizontal relative position of the ball in the image to the topic `/ball_chaser/ball_hor_loc`. This message is of type `ball_chaser::HorizontalLocation`:
+3. `process_image` scans raw images published by the camera (it subscribes to topic `/camera/rgb/image_raw`) and publishes the normalized position of the ball in the image to the topic `/ball_chaser/ball_norm_position`. This message is of type `ball_chaser::NormalizedPosition`:
   ```
-  # Message containing information about horizontal location of
-  # an object in an image
+  # Message containing normalized position of an object in an image.
+  # Both components (horizontal and vertical) are in [-1, 1]
   bool contains_object
-  float64 horizontal_relative_position
+  float64 horizontal
+  float64 vertical
   ```
-   The horizontal relative position of a pixel in an image is its position with respect to the vertical line that crosses the image by its half, scaled to be in [-1, 1].
+   The horizontal component of the normalized position of a pixel in an image is its position with respect to the vertical line that crosses the image by its half, scaled to be in [-1, 1]. The definition of the vertical component is analogous, using in this case the horizontal line that crosse the image by its half as reference.
 
 Calls to service `/ball_chaser/command_robot` were moved from `process_image` to `chase_ball` in order to isolate the decision/command process from the environment analysis (processing of the image).
 
 ### Behaviour
 
 1. Ball is seen by camera
-   In this case, the robot will drive towards the ball, turning left of right based on the relative horizontal position of the ball in the image.
+   In this case, the robot will drive towards the ball, turning left of right based on the position of the ball in the image.
 
   <p align="center">
     <img src="doc/chasing.gif">

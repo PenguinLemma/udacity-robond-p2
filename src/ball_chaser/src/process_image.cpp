@@ -1,34 +1,38 @@
 #include "ros/ros.h"
 #include <sensor_msgs/Image.h>
-#include "ball_chaser/HorizontalLocation.h"
+#include "ball_chaser/NormalizedPosition.h"
 
 #include <string>
 
-double GetRelativeHorizontalPosition(int column, int num_row_pixels)
+double GetNormalizedComponent(int index, int num_pixels_chosen_dim)
 {
-    int midpoint = num_row_pixels / 2;
+    int midpoint = num_pixels_chosen_dim / 2;
     // Correction to get symmetric values for even number of pixels\
     // in a row. In this case, the result will +-k/(midpoint-1), for
     // k = 0, ..., midpoint-1, mapping the two central columns to 0
-    if(num_row_pixels % 2 == 0)
+    if(num_pixels_chosen_dim % 2 == 0)
     {
         --midpoint;
-        if(column > num_row_pixels)
-            --column;
+        if(index > num_pixels_chosen_dim)
+            --index;
     }
-    return static_cast<double>(column - midpoint)/static_cast<double>(midpoint);
+    return static_cast<double>(index - midpoint)/static_cast<double>(midpoint);
 }
 
 
-// Processes image and publishes horizontal relative position
-// of first white pixel found. Values of horizontal relative
-// position range from -1 to 1, with 0 corresponding to the
-// middle column (or pair of columns if the number of pixels
-// per row is even). In the case the bool in published message
-// is set to false (there was no white pixel), horizontal
-// relative position should be ignored.
-// Message type is ball_chaser::HorizontalLocation
-// Topic it is published into is "/ball_chaser/ball_hor_loc"
+// Processes image and publishes normalized position
+// of first white pixel found, which is the utmost left
+// white in the lowest row of pixels containing white
+// pixels.
+// Values of horizontal/vertical component of the
+// normalized position range from -1 to 1, with 0
+// corresponding to the middle column/row (or pair of
+// columns/rows if the number of pixels per row/column is even).
+// In the case the bool in published message is set to false
+// (there was no white pixel), normalized position should
+// be ignored.
+// Message type is ball_chaser::NormalizedPosition
+// Topic it is published into is "/ball_chaser/ball_norm_position"
 class ImageProcessor
 {
     ros::Publisher location_publisher_;
@@ -52,9 +56,10 @@ void ImageProcessor::Run()
                                                 this);
 
     // Inform ROS master that we will be publishing a message of type
-    // ball_chaser::HorizontalLocation on the /ball_chaser/ball_hor_loc topic
-    // with a publishing queue size of 10
-    location_publisher_ = nodeh.advertise<ball_chaser::HorizontalLocation>("/ball_chaser/ball_hor_loc", 10);
+    // ball_chaser::NormalizedPosition on the /ball_chaser/ball_norm_position
+    // topic with a publishing queue size of 10
+    location_publisher_ =
+        nodeh.advertise<ball_chaser::NormalizedPosition>("/ball_chaser/ball_norm_position", 10);
 
     // Handle ROS communication events
     ros::spin();
@@ -62,15 +67,16 @@ void ImageProcessor::Run()
 
 void ImageProcessor::ProcessImageCallback(const sensor_msgs::Image& img)
 {
-    ball_chaser::HorizontalLocation hloc;
+    ball_chaser::NormalizedPosition pos;
 
     uint8_t saturated_color_component{255};
     bool is_there_white_pixel{false};
-    double rel_pos_white_pixel{0.0};
+    double hor_pos_white_pixel{0.0};
+    double ver_pos_white_pixel{0.0};
     int red_byte_offset = 0;
     int green_byte_offset = 1;
     int blue_byte_offset = 2;
-    for(int row = 0; row < img.height; ++row)
+    for(int row = img.height - 1; row >= 0; --row)
     {
         for(int column = 0; column < img.step; column+=3)
         {
@@ -80,19 +86,21 @@ void ImageProcessor::ProcessImageCallback(const sensor_msgs::Image& img)
               && img.data[index_raw_data + blue_byte_offset] == saturated_color_component)
             {
                 is_there_white_pixel = true;
-                rel_pos_white_pixel = GetRelativeHorizontalPosition(column, img.step);
+                hor_pos_white_pixel = GetNormalizedComponent(column, img.step);
+                ver_pos_white_pixel = GetNormalizedComponent(row, img.height);
                 break;
             }
         }
     }
 
-    // In the case there is no white pixel, horizontal_relative_position
+    // In the case there is no white pixel, normalized position
     // will be ignored, so we can fill it anyway.
-    hloc.contains_object = is_there_white_pixel;
-    hloc.horizontal_relative_position = rel_pos_white_pixel;
+    pos.contains_object = is_there_white_pixel;
+    pos.horizontal = hor_pos_white_pixel;
+    pos.vertical = ver_pos_white_pixel;
 
-    // Publish horizontal location
-    location_publisher_.publish(hloc);
+    // Publish normalized position
+    location_publisher_.publish(pos);
 }
 
 int main(int argc, char** argv)
