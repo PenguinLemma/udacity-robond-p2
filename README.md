@@ -7,9 +7,9 @@ Go Chase It! - Project 2 of the Udacity Robotics Software Engineer Nanodegree
 
 This project contains:
 1. Two-wheeled robot that:
-  - supports differential drive (and is stable)
-  - is housed in the world created in [Build My World](https://github.com/PenguinLemma/udacity-robond-p1 "RoboND Project 1 - PenguinLemma")
-  - is equiped with a camera and a lidar
+    - supports differential drive (and is stable)
+    - is housed in the world created in [Build My World](https://github.com/PenguinLemma/udacity-robond-p1 "RoboND Project 1 - PenguinLemma")
+    - is equiped with a camera and a lidar
 2. White ball that will be chased by the robot
 3. C++ source code of nodes that will command the robot to chase the ball, in the case the camera is seeing the ball.
 
