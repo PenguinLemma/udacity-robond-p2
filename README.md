@@ -77,13 +77,13 @@ Calls to service `/ball_chaser/command_robot` were moved from `process_image` to
 1. Clone the repository
 
 ```git
-git clone https://github.com/PenguinLemma/udacity-robond-p1.git PenguinLemmaRoboND_P2
+git clone https://github.com/PenguinLemma/udacity-robond-p2.git $PATH_TO_PARENT_DIR/PenguinLemmaRoboND_P2
 ```
 
 2. Initialise catkin workspace and set env variables
 
 ```shell
-cd PenguinLemmaRoboND_P2
+cd $PATH_TO_PARENT_DIR/PenguinLemmaRoboND_P2
 catkin_make
 source set_env_var_$VERSION.$SHELL
 ```
@@ -122,7 +122,7 @@ The ball is initially hidden from the robot, move it where it can find it. Don't
 - [ ] Resize robot (chasis and sensors base radius, mainly) so that it fits through the doors ^^
 - [x] In chase_ball.cpp, in the case the ball was not found in the image, scan surroundings (set angular_z velocity to positive). After a full turn, if it's still not found, stop the robot.
 - [ ] As in previous point, but after the fulll scan, if ball is still not found move randomly and remember to not scan surroundings for a while, to avoid ballroom dancing.
-- [ ] Use `opencv` to detect spheres of any give color and find their centroid
+- [ ] Use `OpenCV` to detect spheres of any give color and find their centroid
 - [ ] Extract "scan_surroundings" and "go_somewhere_else" as actions
 
 ## License
